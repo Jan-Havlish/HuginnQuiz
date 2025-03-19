@@ -355,7 +355,7 @@ Please format your output as valid JSON that can be directly used inside a quiz 
             href="https://havlish.web.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 underline hover:text-blue-900"
+            className="text-blue-600 underline hover:text-blue-900 mr-4"
           >
             havlis.web.app
           </a>
