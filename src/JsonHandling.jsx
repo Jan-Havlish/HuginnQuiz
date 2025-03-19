@@ -39,7 +39,7 @@ export const SaveJsonButton = ({ data, filename = "data.json" }) => {
     <div>
       <button
         onClick={saveFile}
-        className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-700"
+        className="p-2 bg-yellow-300 text-zinc-700 rounded-md hover:bg-yellow-700"
         disabled={saveError !== null}
       >
         Uložit
@@ -91,7 +91,7 @@ export const LoadJsonButton = ({ onLoad }) => {
       />
       <button
         onClick={() => fileInputRef.current.click()}
-        className="p-2 bg-green-500 text-white rounded-md hover:bg-green-700"
+        className="p-2 bg-amber-600 text-zinc-900 rounded-md hover:bg-green-700"
       >
         Načíst
       </button>

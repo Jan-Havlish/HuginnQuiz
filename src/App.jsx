@@ -227,7 +227,7 @@ Please format your output as valid JSON that can be directly used inside a quiz 
                 onChange={(e) => setNumberOfQuestions(e.target.value)}
               />
               <button
-                className="p-3 bg-green-600 hover:bg-green-800 text-white font-bold rounded-md transition-colors"
+                className="p-3 bg-yellow-300 hover:bg-yellow-400 text-zinc-700 font-bold rounded-md transition-colors"
                 onClick={generateQuiz}
               >
                 Vygenerovat Kvíz
@@ -262,7 +262,7 @@ Please format your output as valid JSON that can be directly used inside a quiz 
               />
               {jsonError && <div className="text-red-600">{jsonError}</div>}
               <button
-                className="p-3 bg-yellow-300 hover:bg-yellow-500 text-white font-bold rounded-md transition-colors"
+                className="p-3 bg-yellow-300 hover:bg-yellow-500 text-zinc-700 font-bold rounded-md transition-colors"
                 onClick={startQuiz}
                 disabled={!!jsonError}
               >
@@ -352,12 +352,20 @@ Please format your output as valid JSON that can be directly used inside a quiz 
       {screen === "start" && (
         <footer className="bg-white p-4 m-8 rounded-md shadow-md flex justify-center">
           <a
-            href="www.havlish.web.app"
+            href="https://havlish.web.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 underline hover:text-blue-900"
           >
             havlis.web.app
+          </a>
+          <a
+            href="https://github.com/Jan-Havlish/HuginnQuiz"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline hover:text-blue-900"
+          >
+            GitHub
           </a>
         </footer>
       )}

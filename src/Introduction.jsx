@@ -10,7 +10,7 @@ export default function Introduction() {
       <div className="flex gap-2 mb-4">
         <button
           className={`p-2 rounded-md ${
-            activeTab === 0 ? "bg-yellow-300 text-white" : "bg-gray-200"
+            activeTab === 0 ? "bg-yellow-300 text-zinc-700" : "bg-gray-200"
           }`}
           onClick={() => setActiveTab(0)}
         >
@@ -18,7 +18,7 @@ export default function Introduction() {
         </button>
         <button
           className={`p-2 rounded-md ${
-            activeTab === 1 ? "bg-yellow-400 text-white" : "bg-gray-200"
+            activeTab === 1 ? "bg-yellow-400 text-zinc-700" : "bg-gray-200"
           }`}
           onClick={() => setActiveTab(1)}
         >
