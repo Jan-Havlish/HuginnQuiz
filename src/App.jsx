@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { call } from "./ai";
 import { SaveJsonButton, LoadJsonButton } from "./JsonHandling";
 import Introduction from "./Introduction";
+import { sampleQuizJson } from "./sample";
+import Footer from "./Footer";
 
 const App = () => {
   // State variables
@@ -18,8 +20,9 @@ const App = () => {
   const timerRef = useRef(null);
   const timerBarRef = useRef(null);
 
-  // New state variables for the API key, topic, and number of questions
+  // New state variables for the API key, API choice, topic, and number of questions
   const [apiKey, setApiKey] = useState("");
+  const [apiChoice, setApiChoice] = useState("own"); // "own" nebo "cloud"
   const [topic, setTopic] = useState("");
   const [numberOfQuestions, setNumberOfQuestions] = useState(5);
 
@@ -141,12 +144,15 @@ const App = () => {
     }
   }, [currentQuestionIndex, screen, quiz]);
 
-  // Generate quiz via AI
+  // Generate quiz via AI using the Netlify Function
   const generateQuiz = async () => {
-    if (!apiKey || !topic || !numberOfQuestions) {
-      alert(
-        "Please fill in your API key, quiz topic, and number of questions.",
-      );
+    // Kontrola: pokud se volí vlastní API, musí být vyplněno; pro cloud volbu nemusí být.
+    if (apiChoice === "own" && !apiKey) {
+      alert("Prosím, vložte svůj API key.");
+      return;
+    }
+    if (!topic || !numberOfQuestions) {
+      alert("Prosím, vyplňte téma kvízu a počet otázek.");
       return;
     }
 
@@ -178,9 +184,28 @@ Give the quiz an appropriate title
 Please format your output as valid JSON that can be directly used inside a quiz application.`;
 
     try {
-      const response = await call(apiKey, prompt);
-      console.log(response, "call in app");
-      // Assume response is valid JSON; update both states
+      // Pokud zvoleno "cloud", předáme undefined, aby Netlify funkce použila výchozí API key
+      const keyToUse = apiChoice === "own" ? apiKey : undefined;
+
+      console.log(keyToUse, apiChoice === "own", "api choise");
+      let response = "";
+      console.log(apiKey, "apikey");
+      if (apiChoice === "own") {
+        response = await call(keyToUse, prompt);
+        console.log(response, "call in app");
+        // Assume response is valid JSON; update both states
+      } else {
+        const res = await fetch("/.netlify/functions/call", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt }),
+        });
+        response = await res.json(); // Extract JSON data from the response
+        console.log(response, "from clf");
+      }
+
       const newJson = JSON.stringify(response, null, 2);
       setJsonInput(newJson);
       setValidJson(newJson);
@@ -205,13 +230,47 @@ Please format your output as valid JSON that can be directly used inside a quiz 
           <aside className="w-full lg:w-1/3 bg-white p-6 rounded-md shadow-md h-fit">
             <Introduction />
             <div className="flex flex-col gap-3">
-              <input
-                type="password"
-                className="p-2 border border-gray-300 rounded-md"
-                placeholder="Vložte API key"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-              />
+              {/* Výběr API klíče */}
+              <div className="flex flex-col gap-2">
+                <span className="font-bold">Vyberte API klíč:</span>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="apiChoice"
+                    value="own"
+                    checked={apiChoice === "own"}
+                    onChange={() => setApiChoice("own")}
+                  />
+                  Použít vlastní API klíč
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="apiChoice"
+                    value="cloud"
+                    checked={apiChoice === "cloud"}
+                    onChange={() => setApiChoice("cloud")}
+                  />
+                  Použít cloudový API klíč
+                </label>
+              </div>
+
+              {/* Pokud je zvolen vlastní API klíč, zobrazíme input */}
+              {apiChoice === "own" && (
+                <input
+                  type="password"
+                  className="p-2 border border-gray-300 rounded-md"
+                  placeholder="Vložte API key"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                />
+              )}
+              {apiChoice === "cloud" && (
+                <div className="p-2 border border-gray-300 rounded-md text-gray-600">
+                  Použije se cloudový API klíč.
+                </div>
+              )}
+
               <input
                 type="text"
                 className="p-2 border border-gray-300 rounded-md"
@@ -349,65 +408,9 @@ Please format your output as valid JSON that can be directly used inside a quiz 
         </section>
       </main>
 
-      {screen === "start" && (
-        <footer className="bg-white p-4 m-8 rounded-md shadow-md flex justify-center">
-          <a
-            href="https://havlish.web.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 underline hover:text-blue-900 mr-4"
-          >
-            havlis.web.app
-          </a>
-          <a
-            href="https://github.com/Jan-Havlish/HuginnQuiz"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 underline hover:text-blue-900"
-          >
-            GitHub
-          </a>
-        </footer>
-      )}
+      {screen === "start" && <Footer />}
     </div>
   );
 };
-
-// Sample quiz JSON
-const sampleQuizJson = `{
-  "title": "Ultimátní kvíz smíšených znalostí",
-  "questions": [
-    {
-      "question": "Která planeta v naší sluneční soustavě má nejvíce měsíců?",
-      "answers": ["Jupiter", "Saturn", "Uran", "Neptun"],
-      "correctIndex": 1,
-      "timeLimit": 20
-    },
-    {
-      "question": "Jaké je hlavní město Austrálie?",
-      "answers": ["Sydney", "Melbourne", "Canberra", "Perth"],
-      "correctIndex": 2,
-      "timeLimit": 15
-    },
-    {
-      "question": "Ve kterém roce byl vydán první iPhone?",
-      "answers": ["2005", "2006", "2007", "2008"],
-      "correctIndex": 2,
-      "timeLimit": 15
-    },
-    {
-      "question": "Který prvek má chemický symbol 'Au'?",
-      "answers": ["Stříbro", "Zlato", "Hliník", "Argon"],
-      "correctIndex": 1,
-      "timeLimit": 10
-    },
-    {
-      "question": "Jaký je největší druh žraloka?",
-      "answers": ["Žralok bílý", "Žralok obrovský", "Žralok tygří", "Kladivoun"],
-      "correctIndex": 1,
-      "timeLimit": 15
-    }
-  ]
-}`;
 
 export default App;
