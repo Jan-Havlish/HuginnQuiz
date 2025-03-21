@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
-import { call } from "./ai";
-import { SaveJsonButton, LoadJsonButton } from "./JsonHandling";
-import Introduction from "./Introduction";
+import React, { useState } from "react";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import QuizSetup from "./components/QuizSetup";
+import QuizQuestion from "./components/QuizQuestion";
+import QuizResults from "./components/QuizResults";
 import { sampleQuizJson } from "./sample";
-import Footer from "./Footer";
 
 const App = () => {
   // State variables
@@ -12,26 +13,9 @@ const App = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [results, setResults] = useState([]);
-  // jsonInput holds the raw text, validJson holds the last successfully parsed JSON text
   const [jsonInput, setJsonInput] = useState(sampleQuizJson);
   const [validJson, setValidJson] = useState(sampleQuizJson);
   const [jsonError, setJsonError] = useState("");
-  const [timeLeft, setTimeLeft] = useState(0);
-  const timerRef = useRef(null);
-  const timerBarRef = useRef(null);
-
-  // New state variables for the API key, API choice, topic, and number of questions
-  const [apiKey, setApiKey] = useState("");
-  const [apiChoice, setApiChoice] = useState("own"); // "own" nebo "cloud"
-  const [topic, setTopic] = useState("");
-  const [numberOfQuestions, setNumberOfQuestions] = useState(5);
-
-  // Clear timers when component unmounts
-  useEffect(() => {
-    return () => {
-      clearTimeout(timerRef.current);
-    };
-  }, []);
 
   // Handle changes in the textarea
   const handleJsonChange = (e) => {
@@ -74,26 +58,7 @@ const App = () => {
     }
   };
 
-  const startTimer = (seconds) => {
-    clearTimeout(timerRef.current);
-    setTimeLeft(seconds);
-
-    if (timerBarRef.current) {
-      timerBarRef.current.style.transition = "none";
-      timerBarRef.current.style.width = "100%";
-      void timerBarRef.current.offsetWidth; // force reflow
-      timerBarRef.current.style.transition = `width ${seconds}s linear`;
-      timerBarRef.current.style.width = "0%";
-    }
-
-    timerRef.current = setTimeout(() => {
-      recordResult(false, null);
-      nextQuestion();
-    }, seconds * 1000);
-  };
-
   const selectAnswer = (answerIndex) => {
-    clearTimeout(timerRef.current);
     const question = quiz.questions[currentQuestionIndex];
     const isCorrect = answerIndex === question.correctIndex;
     recordResult(isCorrect, answerIndex);
@@ -133,279 +98,38 @@ const App = () => {
     setScore(0);
     setResults([]);
     setScreen("start");
-    clearTimeout(timerRef.current);
-  };
-
-  // Start timer on question change
-  useEffect(() => {
-    if (screen === "question" && quiz) {
-      const question = quiz.questions[currentQuestionIndex];
-      startTimer(question.timeLimit || 20);
-    }
-  }, [currentQuestionIndex, screen, quiz]);
-
-  // Generate quiz via AI using the Netlify Function
-  const generateQuiz = async () => {
-    // Kontrola: pokud se volí vlastní API, musí být vyplněno; pro cloud volbu nemusí být.
-    if (apiChoice === "own" && !apiKey) {
-      alert("Prosím, vložte svůj API key.");
-      return;
-    }
-    if (!topic || !numberOfQuestions) {
-      alert("Prosím, vyplňte téma kvízu a počet otázek.");
-      return;
-    }
-
-    const prompt = `Hi, Create a Kahoot-style quiz in JSON format with the following structure:
-
-{
-  "title": "Your Quiz Title",
-  "questions": [
-    {
-      "question": "Question text goes here?",
-      "answers": ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
-      "correctIndex": 0,
-      "timeLimit": 20
-    }
-    // More questions...
-  ]
-}
-
-Requirements:
-Generate ${numberOfQuestions} multiple-choice questions about ${topic}
-Each question must have exactly 4 answer options
-The correctIndex should be the 0-based index of the correct answer (0-3)
-timeLimit specifies how many seconds users have to answer (10-30 seconds)
-Make questions engaging and varied in difficulty
-Include a mix of text-based questions
-Ensure there is only one correct answer per question
-Give the quiz an appropriate title
-
-Please format your output as valid JSON that can be directly used inside a quiz application.`;
-
-    try {
-      // Pokud zvoleno "cloud", předáme undefined, aby Netlify funkce použila výchozí API key
-      const keyToUse = apiChoice === "own" ? apiKey : undefined;
-
-      console.log(keyToUse, apiChoice === "own", "api choise");
-      let response = "";
-      console.log(apiKey, "apikey");
-      if (apiChoice === "own") {
-        response = await call(keyToUse, prompt);
-        console.log(response, "call in app");
-        // Assume response is valid JSON; update both states
-      } else {
-        const res = await fetch("/.netlify/functions/call", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ prompt }),
-        });
-        response = await res.json(); // Extract JSON data from the response
-        console.log(response, "from clf");
-      }
-
-      const newJson = JSON.stringify(response, null, 2);
-      setJsonInput(newJson);
-      setValidJson(newJson);
-      setJsonError("");
-    } catch (error) {
-      console.error("Error generating quiz:", error);
-      alert("Error generating quiz. Check console for details.");
-    }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100 text-gray-800">
-      {/* Header */}
-      <header className="bg-yellow-500 text-white p-4 shadow-md text-center">
-        <h1 className="text-3xl font-bold">HuginnQuiz</h1>
-      </header>
+      <Header />
 
-      {/* Main content */}
       <main className="flex-1 flex flex-col lg:flex-row p-8 max-w-8xl mx-auto w-full gap-8">
-        {/* Sidebar */}
         {screen === "start" && (
-          <aside className="w-full lg:w-1/3 bg-white p-6 rounded-md shadow-md h-fit">
-            <Introduction />
-            <div className="flex flex-col gap-3">
-              {/* Výběr API klíče */}
-              <div className="flex flex-col gap-2">
-                <span className="font-bold">Vyberte API klíč:</span>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="apiChoice"
-                    value="own"
-                    checked={apiChoice === "own"}
-                    onChange={() => setApiChoice("own")}
-                  />
-                  Použít vlastní API klíč
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="apiChoice"
-                    value="cloud"
-                    checked={apiChoice === "cloud"}
-                    onChange={() => setApiChoice("cloud")}
-                  />
-                  Použít cloudový API klíč
-                </label>
-              </div>
-
-              {/* Pokud je zvolen vlastní API klíč, zobrazíme input */}
-              {apiChoice === "own" && (
-                <input
-                  type="password"
-                  className="p-2 border border-gray-300 rounded-md"
-                  placeholder="Vložte API key"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                />
-              )}
-              {apiChoice === "cloud" && (
-                <div className="p-2 border border-gray-300 rounded-md text-gray-600">
-                  Použije se cloudový API klíč.
-                </div>
-              )}
-
-              <input
-                type="text"
-                className="p-2 border border-gray-300 rounded-md"
-                placeholder="Zadejte téma kvízu"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-              />
-              <input
-                type="number"
-                className="p-2 border border-gray-300 rounded-md"
-                placeholder="Počet otázek"
-                value={numberOfQuestions}
-                onChange={(e) => setNumberOfQuestions(e.target.value)}
-              />
-              <button
-                className="p-3 bg-yellow-300 hover:bg-yellow-400 text-zinc-700 font-bold rounded-md transition-colors"
-                onClick={generateQuiz}
-              >
-                Vygenerovat Kvíz
-              </button>
-              <div className="flex m-2 justify-center gap-2">
-                <SaveJsonButton
-                  data={JSON.parse(validJson)}
-                  filename={JSON.parse(validJson).title + ".json"}
-                />
-                <LoadJsonButton
-                  onLoad={(data) => {
-                    const newJson = JSON.stringify(data, null, 2);
-                    setJsonInput(newJson);
-                    setValidJson(newJson);
-                    setJsonError("");
-                  }}
-                />
-              </div>
-            </div>
-          </aside>
+          <QuizSetup
+            jsonInput={jsonInput}
+            handleJsonChange={handleJsonChange}
+            jsonError={jsonError}
+            startQuiz={startQuiz}
+            validJson={validJson}
+            setJsonInput={setJsonInput}
+            setValidJson={setValidJson}
+            setJsonError={setJsonError}
+          />
         )}
 
-        {/* Quiz Area */}
-        <section className="flex-1 bg-white p-6 rounded-md shadow-md h-3/4">
-          {screen === "start" && (
-            <div className="flex flex-col gap-4">
-              <textarea
-                className="min-h-96 p-3 font-mono border border-gray-300 rounded-md resize-y"
-                value={jsonInput}
-                onChange={handleJsonChange}
-                placeholder="Paste your quiz JSON here..."
-              />
-              {jsonError && <div className="text-red-600">{jsonError}</div>}
-              <button
-                className="p-3 bg-yellow-300 hover:bg-yellow-500 text-zinc-700 font-bold rounded-md transition-colors"
-                onClick={startQuiz}
-                disabled={!!jsonError}
-              >
-                Spustit Kvíz
-              </button>
-            </div>
-          )}
+        {screen === "question" && quiz && (
+          <QuizQuestion
+            quiz={quiz}
+            currentQuestionIndex={currentQuestionIndex}
+            score={score}
+            selectAnswer={selectAnswer}
+          />
+        )}
 
-          {screen === "question" && quiz && (
-            <div className="flex flex-col gap-6 animate-fadeIn">
-              <div className="flex justify-between text-lg font-semibold">
-                <span>
-                  Otázka {currentQuestionIndex + 1} / {quiz.questions.length}
-                </span>
-                <span>Skóre: {score}</span>
-              </div>
-              <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                <div ref={timerBarRef} className="h-full bg-red-500 w-full" />
-              </div>
-              <div className="text-2xl font-bold text-center my-5">
-                {quiz.questions[currentQuestionIndex].question}
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                {quiz.questions[currentQuestionIndex].answers.map(
-                  (answer, i) => (
-                    <div
-                      key={i}
-                      className={`p-5 text-center text-lg font-bold text-white rounded-lg cursor-pointer hover:scale-105 transition-transform ${
-                        [
-                          "bg-red-600",
-                          "bg-blue-600",
-                          "bg-yellow-600",
-                          "bg-green-600",
-                        ][i]
-                      }`}
-                      onClick={() => selectAnswer(i)}
-                    >
-                      {answer}
-                    </div>
-                  ),
-                )}
-              </div>
-            </div>
-          )}
-
-          {screen === "results" && (
-            <div className="flex flex-col gap-6 animate-fadeIn text-center">
-              <h2 className="text-2xl font-bold">Kvíz dokončen!</h2>
-              <div className="text-5xl font-bold text-yellow-800">{score}</div>
-              <h3 className="font-bold text-lg mt-4">Question Summary</h3>
-              <ul className="space-y-3">
-                {results.map((result, index) => (
-                  <li
-                    key={index}
-                    className={`p-4 rounded-md text-left ${
-                      result.isCorrect
-                        ? "bg-green-100 border-l-4 border-green-500"
-                        : "bg-red-100 border-l-4 border-red-500"
-                    }`}
-                  >
-                    <strong>Q{index + 1}:</strong> {result.question}
-                    <div className="font-bold mt-1">
-                      {result.isCorrect ? (
-                        <span>✅ Správně: {result.correctAnswer}</span>
-                      ) : (
-                        <span>
-                          ❌ Odpověděli jste:{" "}
-                          {result.selectedAnswer || "Time's up!"} <br /> Správná
-                          odpověď: {result.correctAnswer}
-                        </span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <button
-                className="p-3 bg-yellow-300 hover:bg-yellow-500 text-white font-bold rounded-md transition-colors mt-4"
-                onClick={resetQuiz}
-              >
-                Hrát Znovu
-              </button>
-            </div>
-          )}
-        </section>
+        {screen === "results" && (
+          <QuizResults score={score} results={results} resetQuiz={resetQuiz} />
+        )}
       </main>
 
       {screen === "start" && <Footer />}

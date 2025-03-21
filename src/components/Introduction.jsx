@@ -76,7 +76,7 @@ export default function Introduction() {
             <ul className="list-disc list-inside mb-4">
               <li>Otevřete aplikaci s kvízem v prohlížeči.</li>
               <li>Najděte textové pole a vložte do něj svůj JSON.</li>
-              <li>Klikněte na „Start Quiz“ pro spuštění kvízu.</li>
+              <li>Klikněte na „Spustit Kvíz" pro spuštění kvízu.</li>
             </ul>
             <p>
               Tento režim nevyžaduje žádný API klíč ani další nastavení – stačí
@@ -90,27 +90,32 @@ export default function Introduction() {
           <div>
             <h3 className="font-bold text-xl mb-4">Jak používat s API</h3>
             <p className="mb-2">
-              Můžete také generovat kvíz dynamicky pomocí API (např. přes velký
-              jazykový model). Postup je následující:
+              Pro generování kvízů pomocí AI máte dvě možnosti:
+            </p>
+            <h4 className="font-semibold mt-3 mb-1">Vlastní API klíč:</h4>
+            <ol className="list-decimal list-inside mb-4">
+              <li>Vyberte možnost „Použít vlastní API klíč".</li>
+              <li>Vložte svůj API klíč do příslušného pole.</li>
+              <li>Uveďte téma kvízu a požadovaný počet otázek (1-20).</li>
+              <li>Klikněte na „Vygenerovat Kvíz" a počkejte na výsledek.</li>
+              <li>Vygenerovaný JSON můžete dále upravit podle potřeby.</li>
+            </ol>
+            <h4 className="font-semibold mt-3 mb-1">Cloudový API klíč:</h4>
+            <p className="mb-2">
+              Aplikace nabízí omezený počet generování kvízů prostřednictvím
+              našeho API klíče:
             </p>
             <ol className="list-decimal list-inside mb-4">
-              <li>Vložte svůj API klíč do příslušného pole.</li>
-              <li>Uveďte téma kvízu a počet otázek.</li>
+              <li>Vyberte možnost „Použít cloudový API klíč".</li>
+              <li>Zadejte téma kvízu a počet otázek.</li>
+              <li>Klikněte na „Vygenerovat Kvíz".</li>
               <li>
-                Klikněte na „Generate Quiz“, čímž se z API získá JSON kvíz.
+                Mějte prosím na paměti, že tato možnost má omezený počet použití
+                pro každého uživatele.
               </li>
-              <li>
-                Vygenerovaný JSON se zobrazí v textovém poli – můžete ho ještě
-                upravit, pokud chcete.
-              </li>
-              <li>Stiskněte „Start Quiz“ a kvíz se spustí.</li>
             </ol>
             <p className="mb-2">
-              Ujistěte se, že je váš API klíč platný a že máte potřebná práva
-              pro danou službu.
-            </p>
-            <p>
-              Pro získání API klíče Gemini zdarma klikněte{" "}
+              Pro získání vlastního API klíče Gemini zdarma klikněte{" "}
               <a
                 href="https://aistudio.google.com/welcome"
                 target="_blank"
@@ -118,8 +123,13 @@ export default function Introduction() {
                 className="text-blue-600 underline hover:text-blue-900"
               >
                 zde
-              </a>{" "}
-              přihlašte se, klikněte na tlačítko s ikonou klíče - "Get a key".
+              </a>
+              , přihlašte se a klikněte na tlačítko s ikonou klíče - "Get a
+              key".
+            </p>
+            <p className="text-sm italic text-gray-600 mt-2">
+              Poznámka: Z bezpečnostních důvodů je při použití cloudového API
+              klíče generování omezeno a zabezpečeno proti zneužití.
             </p>
           </div>
         )}

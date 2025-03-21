@@ -1,23 +1,42 @@
 // netlify/functions/call.js
-
 exports.handler = async (event, context) => {
   console.log("Netlify Function 'call' initiated");
-
   try {
-    // Získání dat z těla požadavku
-    const { api, prompt } = JSON.parse(event.body);
+    // Parse request data
+    const { quizTopic, questionCount, api } = JSON.parse(event.body);
 
-    // Pokud není poskytnut API klíč, použije se výchozí uložený v proměnné prostředí
-    const apiKey = api || process.env.DEFAULT_API_KEY;
-
-    if (!apiKey || !prompt) {
+    // Security check: Require topic and question count
+    if (!quizTopic || !questionCount) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "API klíč a prompt jsou povinné" }),
+        body: JSON.stringify({
+          error: "Quiz topic and question count are required",
+        }),
       };
     }
 
-    // Volání externího API
+    // Use environment variable for API key, never expose it to client
+    const apiKey = api || process.env.DEFAULT_API_KEY;
+    if (!apiKey) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: "API configuration error" }),
+      };
+    }
+
+    // Build the prompt server-side to prevent prompt injection attacks
+    const prompt = buildQuizPrompt(quizTopic, questionCount);
+
+    // Rate limiting (optional, pseudocode - implement based on your needs)
+    // const clientIP = event.headers['client-ip'] || event.requestContext.identity.sourceIp;
+    // if (await hasExceededRateLimit(clientIP)) {
+    //   return {
+    //     statusCode: 429,
+    //     body: JSON.stringify({ error: "Rate limit exceeded. Try again later." }),
+    //   };
+    // }
+
+    // Call external API
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
@@ -49,7 +68,6 @@ exports.handler = async (event, context) => {
     }
 
     const data = await response.json();
-
     if (
       !data ||
       !data.candidates ||
@@ -64,7 +82,6 @@ exports.handler = async (event, context) => {
     }
 
     let textResponse = data.candidates[0].content.parts[0].text;
-
     if (!textResponse) {
       return {
         statusCode: 500,
@@ -72,31 +89,59 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Odebrání obalů kódových bloků, pokud jsou přítomny
+    // Remove code block wrappers if present
     textResponse = textResponse.replace(/```json\n/g, "").replace(/```/g, "");
 
-    // Pokus o parsování textu jako JSON
+    // Try to parse text as JSON
     try {
       const jsonResponse = JSON.parse(textResponse);
-      console.log("Úspěšně parsován JSON response");
-      console.log(jsonResponse);
+      console.log("Successfully parsed JSON response");
       return {
         statusCode: 200,
         body: JSON.stringify(jsonResponse),
       };
     } catch (jsonError) {
       console.warn("JSON parsing error:", jsonError);
-      console.log("Raw Response:", textResponse);
       return {
-        statusCode: 200,
-        body: JSON.stringify({ result: textResponse }),
+        statusCode: 500,
+        body: JSON.stringify({ error: "Invalid JSON received from API" }),
       };
     }
   } catch (error) {
     console.error("API call error:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
+      body: JSON.stringify({ error: "Server error" }),
     };
   }
 };
+
+// Build quiz prompt server-side to prevent prompt injection
+function buildQuizPrompt(topic, numberOfQuestions) {
+  return `Hi, Create a Kahoot-style quiz in JSON format with the following structure:
+
+{
+  "title": "Your Quiz Title",
+  "questions": [
+    {
+      "question": "Question text goes here?",
+      "answers": ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+      "correctIndex": 0,
+      "timeLimit": 20
+    }
+    // More questions...
+  ]
+}
+
+Requirements:
+Generate ${numberOfQuestions} multiple-choice questions about ${topic}
+Each question must have exactly 4 answer options
+The correctIndex should be the 0-based index of the correct answer (0-3)
+timeLimit specifies how many seconds users have to answer (10-30 seconds)
+Make questions engaging and varied in difficulty
+Include a mix of text-based questions
+Ensure there is only one correct answer per question
+Give the quiz an appropriate title
+
+Please format your output as valid JSON that can be directly used inside a quiz application.`;
+}

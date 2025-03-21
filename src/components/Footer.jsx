@@ -7,7 +7,7 @@ function Footer() {
         rel="noopener noreferrer"
         className="text-blue-600 underline hover:text-blue-900 mr-4"
       >
-        havlis.web.app
+        havlish.web.app
       </a>
       <a
         href="https://github.com/Jan-Havlish/HuginnQuiz"
