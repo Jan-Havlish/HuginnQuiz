@@ -18,10 +18,26 @@ export const SaveJsonButton = ({ data, filename }) => {
 
   return (
     <button
-      className="p-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition-colors"
+      className="px-4 py-2 text-white font-semibold rounded-md shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 bg-green-500 hover:bg-green-600 order-3 sm:order-2 focus:ring-green-400"
       onClick={handleSave}
     >
-      💾 Uložit
+      {/* Children or default content */}
+      {/* Example default content: */}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+        />
+      </svg>
+      Uložit JSON
     </button>
   );
 };
@@ -58,10 +74,24 @@ export const LoadJsonButton = ({ onLoad }) => {
         onChange={handleLoad}
       />
       <button
-        className="p-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md transition-colors"
+        className="px-4 py-2 text-white font-semibold rounded-md shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 bg-green-500 hover:bg-green-600 focus:ring-green-400" /* Example combined class */
         onClick={triggerFileInput}
       >
-        📂 Načíst
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+          />
+        </svg>
+        Načíst JSON
       </button>
     </>
   );

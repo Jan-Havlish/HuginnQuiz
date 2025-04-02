@@ -1,135 +1,204 @@
 import React, { useState } from "react";
 
-export default function Introduction() {
-  // 0 = Úvod, 1 = Použití bez API, 2 = Jak používat s API
+function Introduction() {
   const [activeTab, setActiveTab] = useState(0);
 
+  const tabButtonBase =
+    "px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-1";
+  const tabButtonInactive = "bg-gray-200 text-gray-600 hover:bg-gray-300";
+  const tabButtonActive = "bg-yellow-400 text-gray-800"; // Use darker text on yellow bg
+
   return (
-    <div className="mb-4">
-      {/* Tlačítka karet */}
-      <div className="flex gap-2 mb-4">
+    // Removed outer mb-4, let parent control spacing
+    <div>
+      {/* Tabs Container */}
+      {/* Consistent gap and margin */}
+      <div className="flex flex-wrap gap-2 mb-4 border-b border-gray-200 pb-2">
         <button
-          className={`p-2 rounded-md ${
-            activeTab === 0 ? "bg-yellow-300 text-zinc-700" : "bg-gray-200"
-          }`}
+          className={`${tabButtonBase} ${activeTab === 0 ? tabButtonActive : tabButtonInactive}`}
           onClick={() => setActiveTab(0)}
         >
           Úvod
         </button>
         <button
-          className={`p-2 rounded-md ${
-            activeTab === 1 ? "bg-yellow-400 text-zinc-700" : "bg-gray-200"
-          }`}
+          className={`${tabButtonBase} ${activeTab === 1 ? tabButtonActive : tabButtonInactive}`}
           onClick={() => setActiveTab(1)}
         >
           Použití bez API
         </button>
         <button
-          className={`p-2 rounded-md ${
-            activeTab === 2 ? "bg-yellow-400 text-white" : "bg-gray-200"
-          }`}
+          className={`${tabButtonBase} ${activeTab === 2 ? tabButtonActive : tabButtonInactive}`}
           onClick={() => setActiveTab(2)}
         >
           Jak používat s API
         </button>
       </div>
 
-      {/* Obsah karet */}
-      <div className="bg-gray-100 p-3 rounded-md">
-        {/* Karta: Úvod */}
+      {/* Tab Content */}
+      {/* Consistent padding p-4 */}
+      <div className="bg-gray-50 p-4 rounded-md">
+        {" "}
+        {/* Slightly lighter bg */}
+        {/* Tab: Úvod */}
         {activeTab === 0 && (
-          <div>
-            <p className="font-bold text-l mb-4">
-              Tato aplikace je vytvořena pro zábavné kvízy! Můžete si upravit
-              otázky pomocí JSON formátu nebo vygenerovat nové kvízy pomocí AI.
+          // Consistent text styling and spacing
+          <div className="space-y-4 text-sm text-gray-700">
+            <p className="font-semibold text-base text-gray-800">
+              {" "}
+              {/* Slightly larger font */}
+              Vítejte v Quiz Generatoru! Vytvářejte a hrajte zábavné kvízy.
             </p>
-            <p className="mb-2">
-              Vložte JSON kvízu níže nebo si ho nechte vygenerovat pomocí AI.
+            <p>
+              Můžete buď načíst existující kvíz ve formátu JSON, nebo nechat AI
+              vygenerovat nový na základě zadaného tématu.
             </p>
-            <pre className="bg-gray-200 p-3 rounded-md text-sm overflow-x-auto mb-4">
+            <p>Struktura JSON souboru:</p>
+            <pre className="bg-gray-200 p-3 rounded-md text-xs text-gray-800 overflow-x-auto">
               {`{
-"title": "Quiz Title",
-"questions": [
-  {
-    "question": "What is 2+2?",
-    "answers": ["3", "4", "5", "6"],
-    "correctIndex": 1,
-    "timeLimit": 20
-  }
-]
+  "title": "Název Kvízu",
+  "questions": [
+    {
+      "question": "Text otázky?",
+      "answers": ["Odpověď A", "Odpověď B", "Odpověď C", "Odpověď D"],
+      "correctIndex": 1, // Index správné odpovědi (začíná od 0)
+      "timeLimit": 30 // Časový limit v sekundách (nepovinné, výchozí 20)
+    },
+    // ... další otázky
+  ]
 }`}
             </pre>
-          </div>
-        )}
-
-        {/* Karta: Použití bez API */}
-        {activeTab === 1 && (
-          <div>
-            <h3 className="font-bold text-xl mb-4">Použití kvízu bez API</h3>
-            <p className="mb-2">
-              Pokud nechcete využít AI generování, stačí zkopírovat váš JSON s
-              kvízem a vložit ho do textového pole. Dbejte na to, aby váš JSON
-              měl správnou strukturu (název kvízu, pole otázek, každá otázka
-              musí obsahovat text, pole odpovědí, správný index odpovědi a
-              časový limit).
-            </p>
-            <ul className="list-disc list-inside mb-4">
-              <li>Otevřete aplikaci s kvízem v prohlížeči.</li>
-              <li>Najděte textové pole a vložte do něj svůj JSON.</li>
-              <li>Klikněte na „Spustit Kvíz" pro spuštění kvízu.</li>
-            </ul>
             <p>
-              Tento režim nevyžaduje žádný API klíč ani další nastavení – stačí
-              jen validní JSON!
+              Použijte tlačítko{" "}
+              <span className="font-mono bg-gray-200 px-1 rounded">
+                📂 Načíst JSON
+              </span>{" "}
+              pro nahrání souboru nebo{" "}
+              <span className="font-mono bg-gray-200 px-1 rounded">
+                Vygenerovat Kvíz
+              </span>{" "}
+              pro tvorbu pomocí AI.
             </p>
           </div>
         )}
-
-        {/* Karta: Jak používat s API */}
-        {activeTab === 2 && (
-          <div>
-            <h3 className="font-bold text-xl mb-4">Jak používat s API</h3>
-            <p className="mb-2">
-              Pro generování kvízů pomocí AI máte dvě možnosti:
+        {/* Tab: Použití bez API */}
+        {activeTab === 1 && (
+          <div className="space-y-3 text-sm text-gray-700">
+            <h3 className="font-semibold text-base text-gray-800 mb-1">
+              Použití kvízu bez API (načtení JSON)
+            </h3>
+            <p>
+              Pokud máte kvíz připravený v JSON souboru, můžete ho snadno načíst
+              a spustit:
             </p>
-            <h4 className="font-semibold mt-3 mb-1">Vlastní API klíč:</h4>
-            <ol className="list-decimal list-inside mb-4">
-              <li>Vyberte možnost „Použít vlastní API klíč".</li>
-              <li>Vložte svůj API klíč do příslušného pole.</li>
-              <li>Uveďte téma kvízu a požadovaný počet otázek (1-20).</li>
-              <li>Klikněte na „Vygenerovat Kvíz" a počkejte na výsledek.</li>
-              <li>Vygenerovaný JSON můžete dále upravit podle potřeby.</li>
-            </ol>
-            <h4 className="font-semibold mt-3 mb-1">Cloudový API klíč:</h4>
-            <p className="mb-2">
-              Aplikace nabízí omezený počet generování kvízů prostřednictvím
-              našeho API klíče:
-            </p>
-            <ol className="list-decimal list-inside mb-4">
-              <li>Vyberte možnost „Použít cloudový API klíč".</li>
-              <li>Zadejte téma kvízu a počet otázek.</li>
-              <li>Klikněte na „Vygenerovat Kvíz".</li>
+            <ol className="list-decimal list-inside space-y-1 pl-2">
               <li>
-                Mějte prosím na paměti, že tato možnost má omezený počet použití
-                pro každého uživatele.
+                Klikněte na tlačítko{" "}
+                <span className="font-mono bg-gray-200 px-1 rounded">
+                  📂 Načíst JSON
+                </span>{" "}
+                v sekci "Správa souborů" (otevřete Nastavení{" "}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 inline align-text-bottom"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                ).
+              </li>
+              <li>Vyberte váš soubor s příponou `.json`.</li>
+              <li>
+                Ujistěte se, že JSON má správnou strukturu (viz záložka Úvod).
+              </li>
+              <li>
+                Po úspěšném načtení se může zobrazit náhled nebo potvrzení.
+              </li>
+              <li>
+                Kvíz můžete uložit pod jiným názvem pomocí{" "}
+                <span className="font-mono bg-gray-200 px-1 rounded">
+                  💾 Uložit JSON
+                </span>
+                .
+              </li>
+              <li>
+                Spusťte kvíz (tlačítko se objeví po načtení, nebo použijte
+                hlavní tlačítko).
               </li>
             </ol>
-            <p className="mb-2">
-              Pro získání vlastního API klíče Gemini zdarma klikněte{" "}
-              <a
-                href="https://aistudio.google.com/welcome"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline hover:text-blue-900"
-              >
-                zde
-              </a>
-              , přihlašte se a klikněte na tlačítko s ikonou klíče - "Get a
-              key".
+            <p>
+              Tento režim nevyžaduje API klíč ani připojení k internetu (kromě
+              načtení aplikace).
             </p>
-            <p className="text-sm italic text-gray-600 mt-2">
-              Poznámka: Z bezpečnostních důvodů je při použití cloudového API
-              klíče generování omezeno a zabezpečeno proti zneužití.
+          </div>
+        )}
+        {/* Tab: Jak používat s API */}
+        {activeTab === 2 && (
+          <div className="space-y-3 text-sm text-gray-700">
+            <h3 className="font-semibold text-base text-gray-800 mb-1">
+              Generování kvízu pomocí AI (s API)
+            </h3>
+            <p>Pro automatické vytvoření kvízu na zadané téma:</p>
+            <ol className="list-decimal list-inside space-y-1 pl-2">
+              <li>
+                Zadejte téma kvízu do hlavního vstupního pole (např. "Hlavní
+                města Evropy").
+              </li>
+              <li>
+                Otevřete Nastavení (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 inline align-text-bottom"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                ) a zvolte zdroj API klíče:
+              </li>
+              <ul className="list-disc list-inside pl-4 space-y-1">
+                <li>
+                  <b>Použít cloudový:</b> Doporučená, jednodušší volba. Má
+                  omezený počet použití zdarma.
+                </li>
+                <li>
+                  <b>Použít vlastní:</b> Vyžaduje vložení vašeho Google AI
+                  (Gemini) API klíče. Klíč získáte{" "}
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    zde
+                  </a>
+                  . Váš klíč bude uložen pouze lokálně ve vašem prohlížeči.
+                </li>
+              </ul>
+              <li>Nastavte požadovaný počet otázek (1-20).</li>
+              <li>
+                Klikněte na{" "}
+                <span className="font-mono bg-gray-200 px-1 rounded">
+                  Vygenerovat Kvíz
+                </span>
+                . Generování může chvíli trvat.
+              </li>
+              <li>
+                Po dokončení (pokud máte zapnuté potvrzení) se zobrazí dialog,
+                kde můžete kvíz uložit nebo rovnou spustit.
+              </li>
+            </ol>
+            <p className="text-xs italic text-gray-600 mt-2">
+              Poznámka: Kvalita vygenerovaných otázek závisí na AI. Cloudové API
+              je omezené a zabezpečené proti nadměrnému využití.
             </p>
           </div>
         )}
@@ -137,3 +206,5 @@ export default function Introduction() {
     </div>
   );
 }
+
+export default Introduction;

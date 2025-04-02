@@ -49,76 +49,96 @@ const QuizResults = ({
   const saveFilename = getFilename(parsedQuizData);
 
   return (
-    <section className="w-full max-w-4xl mx-auto bg-white p-6 sm:p-8 rounded-lg shadow-lg animate-fadeIn">
+    <section className="w-full max-w-4xl mx-auto bg-white p-6 sm:p-8 rounded-lg shadow-lg animate-fadeIn border border-gray-200">
       <div className="flex flex-col gap-6 text-center">
         <h2 className="text-3xl font-bold text-yellow-600">{displayTitle}</h2>
-        <p className="text-xl mt-2">Vaše konečné skóre:</p>
-        <div className="text-5xl font-bold text-green-600 mb-4">{score}</div>
-        <p className="text-lg mb-6">
+        <p className="text-xl">Vaše konečné skóre:</p>
+        <div className="text-5xl font-bold text-green-600">{score}</div>
+        <p className="text-lg">
           Správně jste odpověděli na {correctAnswers} z {totalQuestions} otázek
           ({accuracy}%).
         </p>
 
-        {/* Action Buttons */}
-        {/* Combined flex container for better responsive layout */}
-        <div className="flex flex-wrap justify-center items-center gap-4 mt-8 border-t pt-6">
+        {/* --- Action Buttons --- */}
+        <div className="flex flex-wrap justify-center items-center gap-4 mt-8 border-t border-gray-200 pt-6">
           <button
-            className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 order-1 sm:order-1" // Order for mobile/desktop
+            className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 order-1 sm:order-1"
             onClick={replayQuiz}
           >
             Hrát Znovu Stejný Kvíz
           </button>
 
-          {/* Conditionally render Save Button only if validJson exists */}
+          {/* Conditionally render Save Button */}
           {parsedQuizData && (
             <SaveJsonButton
               data={parsedQuizData}
               filename={saveFilename}
-              disabled={!parsedQuizData} // Should always be enabled if rendered, but good practice
-              className="bg-green-500 hover:bg-green-600 order-3 sm:order-2" // Adjust order
-            >
-              Uložit Tento Kvíz {/* Specific text */}
-            </SaveJsonButton>
+              disabled={!parsedQuizData}
+            />
           )}
 
           <button
-            className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75 order-2 sm:order-3" // Adjust order
+            className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-md shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75 order-2 sm:order-3"
             onClick={goToSetup}
           >
-            Nový Kvíz {/* Changed text */}
+            Vytvořit Nový Kvíz
           </button>
         </div>
 
-        {/* Question Summary Title */}
-        <h3 className="font-bold text-xl mt-8 border-t pt-6">
+        {/* --- Question Summary Title --- */}
+        <h3 className="font-bold text-xl mt-8 border-t border-gray-200 pt-6">
           Přehled odpovědí
         </h3>
 
-        {/* Results List */}
-        <ul className="space-y-3 text-left max-h-96 overflow-y-auto pr-2">
+        {/* --- Results List (Mapped in React) --- */}
+        <ul className="space-y-4 text-left max-h-96 overflow-y-auto pr-2">
           {results.map((result, index) => (
             <li
               key={index}
-              className={`p-4 rounded-md ${
+              className={`p-4 rounded-md border-l-4 ${
                 result.isCorrect
-                  ? "bg-green-50 border-l-4 border-green-500"
-                  : "bg-red-50 border-l-4 border-red-500"
+                  ? "bg-green-50 border-green-500"
+                  : "bg-red-50 border-red-500"
               }`}
             >
-              <p className="font-semibold mb-1">
+              <p className="font-semibold text-gray-800 mb-1">
                 Otázka {index + 1}: {result.question}
               </p>
-              <div className="text-sm mt-1">
+              <div className="text-sm mt-1 space-y-1">
                 {result.isCorrect ? (
-                  <span className="text-green-700">
-                    ✅ Správně: {result.correctAnswer}
+                  <span className="text-green-700 flex items-center gap-1.5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 inline"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    Správně: {result.correctAnswer}
                   </span>
                 ) : (
                   <>
-                    <span className="text-red-700 block">
-                      ❌ Vaše odpověď: {result.selectedAnswer || "Neodpovězeno"}
+                    <span className="text-red-700 block flex items-center gap-1.5">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 inline"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Vaše odpověď: {result.selectedAnswer || "Neodpovězeno"}
                     </span>
-                    <span className="text-gray-600 block">
+                    <span className="text-gray-600 block pl-6">
                       Správná odpověď: {result.correctAnswer}
                     </span>
                   </>
